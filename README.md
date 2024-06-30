@@ -1,7 +1,7 @@
 # Cloak - A simple privacy script for Firefox
 
 <p align="center">
-  <img src="cloak_logo.png" alt="Cloak Logo" width="150" height="150">
+  <img src="images/cloak_logo.png" alt="Cloak Logo" width="150" height="150">
 </p>
 
 Cloak is designed to enhance privacy and security settings for Firefox ESR (Extended Support Release). It automates the installation process and applies a strict configuration to protect user privacy, providing an out-of-the-box Firefox experience with robust security and privacy features.
