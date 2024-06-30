@@ -49,7 +49,7 @@ This Python script installs Firefox ESR and automatically applies the privacy-en
 2. Right-click the file and select "Run as administrator".
 3. Follow the on-screen prompts to confirm the installation.
 
-##<font color="red">Warnings</font>
+##Warnings
 
 It is strongly recommended to run this program on a fresh installation of Windows without Firefox pre-installed. Running the script on an existing Firefox installation may:
 
