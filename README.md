@@ -1,10 +1,10 @@
-# Cloak - A simple privacy script for Firefox
+# Cloak - Simplified privacy for Firefox
 
 <p align="center">
   <img src="images/cloak_logo.png" alt="Cloak Logo" width="150" height="150">
 </p>
 
-Cloak is designed to enhance privacy and security settings for Firefox ESR (Extended Support Release). It automates the installation process and applies a strict configuration to protect user privacy, providing an out-of-the-box Firefox experience with robust security and privacy features.
+Cloak is designed to automatically enhance privacy and security settings for Firefox ESR (Extended Support Release). The script provides an out-of-the-box Firefox experience with robust security and privacy features.
 
 ## Project Goal
 
@@ -27,6 +27,7 @@ The `strict_config.py` script applies the following privacy-enhancing configurat
   - Removes Google, Bing, and eBay from search shortcuts.
 - **Anti-Fingerprinting**: Activates fingerprinting protection measures to reduce online tracking.
 - **New Tab Page**: Removes sponsored and curated content from the new tab page.
+- **Ad Blocking**: Automatically installs uBlock Origin extension for comprehensive ad and tracker blocking.
 
 ## Scripts
 
@@ -34,14 +35,13 @@ The `strict_config.py` script applies the following privacy-enhancing configurat
 
 This batch script automates the setup process on Windows:
 
-- Checks for and installs Python 3.11+ if not present
-- Installs Firefox ESR if not already installed
+- Checks for and installs Python if not present
 - Downloads and runs the `strict_config.py` script
 - Handles user confirmation and provides warnings about the changes
 
 ### 2. Strict Configuration (strict_config.py)
 
-This Python script installs Firefox ESR and automatically applies the privacy-enhancing configurations listed in the Features section.
+This Python script installs Firefox ESR, automatically applies the privacy-enhancing configurations listed in the Features section, and installs uBlock Origin.
 
 ## Usage
 
@@ -59,7 +59,7 @@ It is strongly recommended to run this program on a fresh installation of Window
 
 If you choose to run this script with an existing Firefox installation, please ensure you have backed up all important data and understand that your current Firefox configuration will be significantly altered. The script is designed to work with a clean installation of Firefox ESR and may not function as intended with modified or pre-configured versions.
 
-- This script significantly modifies your Firefox configuration and may affect your browsing experience.
+- This script significantly modifies your Firefox configuration and may affect your browsing experience and cause certain websites to not function as expected.
 - Some changes include stricter content blocking, fingerprinting protection, and changes to default search and new tab behaviors.
 - This script is not compatible with the Rapid Release version of Firefox.
 - **Important**: Please ensure you understand how installing these features will change your browsing experience before proceeding with the installation.
@@ -78,7 +78,7 @@ The script creates log files in the `%Temp%\firefox_config` directory. Check the
 
 ## Password Manager Recommendation
 
-After installation, it's strongly recommended to review Privacy Guides for information on selecting a robust password manager as Firefox's password manager will be disabled: [Privacy Guides Password Managers](https://www.privacyguides.org/en/passwords/)
+After installation, it's strongly recommended to review Privacy Guides for information on selecting a robust password manager as Firefox's password manager will be disabled: [The Best Password Managers to Protect Your Privacy and Security - Privacy Guides](https://www.privacyguides.org/en/passwords/)
 
 ## Contribution
 
