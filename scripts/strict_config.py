@@ -206,6 +206,18 @@ def validate_url(url):
         logging.error(f"Error validating URL {url}: {str(e)}")
         return False
 
+def fetch_user_js_content(url):
+    try:
+        import requests
+        response = requests.get(url)
+        response.raise_for_status()
+        content = response.text
+        logging.info(f"Successfully fetched user.js content from {url}")
+        return content
+    except requests.RequestException as e:
+        logging.error(f"Error fetching user.js content: {str(e)}")
+        return None
+
 def create_policies_json(policies_dir):
     try:
         additional_engines = [
@@ -328,46 +340,12 @@ def main():
         logging.info("Launching and closing Firefox...")
         launch_and_close_firefox()
 
-        # Custom content for user.js
-        custom_user_js = """
-user_pref("app.shield.optoutstudies.enabled", false);
-user_pref("browser.contentblocking.category", "strict");
-user_pref("browser.discovery.enabled", false);
-user_pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
-user_pref("browser.newtabpage.activity-stream.feeds.topsites", false);
-user_pref("browser.newtabpage.activity-stream.showSponsored", false);
-user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);
-user_pref("browser.newtabpage.activity-stream.feeds.snippets", false);
-user_pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons", false);
-user_pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features", false);
-user_pref("browser.newtabpage.activity-stream.default.sites", "");
-user_pref("browser.newtabpage.pinned", "[]");
-user_pref("browser.safebrowsing.malware.enabled", false);
-user_pref("browser.safebrowsing.phishing.enabled", false);
-user_pref("dom.security.https_only_mode", true);
-user_pref("dom.security.https_only_mode_ever_enabled", true);
-user_pref("network.dns.disablePrefetch", true);
-user_pref("network.http.referer.disallowCrossSiteRelaxingDefault.top_navigation", true);
-user_pref("network.http.speculative-parallel-limit", 0);
-user_pref("network.predictor.enabled", false);
-user_pref("network.prefetch-next", false);
-user_pref("network.trr.custom_uri", "https://dns.quad9.net/dns-query");
-user_pref("network.trr.mode", 3);
-user_pref("network.trr.uri", "https://dns.quad9.net/dns-query");
-user_pref("privacy.annotate_channels.strict_list.enabled", true);
-user_pref("privacy.clearOnShutdown.offlineApps", true);
-user_pref("privacy.donottrackheader.enabled", true);
-user_pref("privacy.fingerprintingProtection", true);
-user_pref("privacy.partition.network_state.ocsp_cache", true);
-user_pref("privacy.query_stripping.enabled", true);
-user_pref("privacy.query_stripping.enabled.pbmode", true);
-user_pref("privacy.resistFingerprinting", true);
-user_pref("privacy.sanitize.sanitizeOnShutdown", true);
-user_pref("privacy.trackingprotection.emailtracking.enabled", true);
-user_pref("privacy.trackingprotection.enabled", true);
-user_pref("privacy.trackingprotection.socialtracking.enabled", true);
-user_pref("signon.rememberSignons", false);
-        """
+        # Fetch user.js content from GitHub
+        user_js_url = "https://raw.githubusercontent.com/PyroDonkey/Firefox-Cloak/main/user.js/strict/user.js"
+        custom_user_js = fetch_user_js_content(user_js_url)
+        if custom_user_js is None:
+            logging.error("Failed to fetch user.js content. Exiting.")
+            return
 
         profile_dir = find_firefox_profile()
         logging.info(f"Firefox profile directory found: {profile_dir}")
@@ -425,5 +403,5 @@ if __name__ == "__main__":
     finally:
         print("\nScript execution completed. Check the firefox_config.log file for details.")
         print("\nConfiguration complete! Enjoy your private Firefox experience.")
-        print("This window will close in 30 seconds...")
-        time.sleep(30)
+        print("This window will close in 20 seconds...")
+        time.sleep(20)
