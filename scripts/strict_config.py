@@ -13,7 +13,6 @@ import traceback
 import ctypes
 from urllib.parse import urlparse
 import tempfile
-import threading
 
 # Error handling setup
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -43,30 +42,8 @@ logging.basicConfig(level=logging.DEBUG,
 logging.info(f"Current working directory: {os.getcwd()}")
 logging.info(f"Script location: {os.path.abspath(__file__)}")
 
-# Global variable to store user's search engine choice
-user_choice = None
-
-def get_user_preferences_with_timeout():
-    global user_choice
-    user_choice = 1  # Always set to 1 for DuckDuckGo
-    return user_choice
-
-def is_admin():
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
-        return False
-
-def run_as_admin():
-    if sys.argv[-1] != 'asadmin':
-        script = os.path.abspath(sys.argv[0])
-        params = ' '.join([script] + sys.argv[1:] + ['asadmin'])
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
-        return True
-    return False
-
 def install_requirements():
-    requirements = ['psutil', 'requests', 'selenium']
+    requirements = ['psutil', 'requests']
     max_retries = 5
     retry_delay = 5
 
@@ -251,13 +228,12 @@ def create_policies_json(policies_dir):
                 if not validate_url(engine[url_key]):
                     logging.error(f"Invalid URL for {engine['Name']}: {url_key}")
                     return False
-        default_engine = "DuckDuckGo" if user_choice == 1 else additional_engines[user_choice - 2]["Name"]
         
         policies = {
             "policies": {
                 "SearchEngines": {
                     "Add": additional_engines,
-                    "Default": default_engine,
+                    "Default": "DuckDuckGo",
                     "Remove": ["Google", "Bing", "Amazon.com", "eBay"]
                 },
                 "SearchSuggestEnabled": False,
@@ -312,13 +288,7 @@ def create_distribution_ini(firefox_dir):
 def main():
     logging.info("Main function started")
     try:
-        global user_choice
-        
         logging.info("Script started with administrator privileges")
-
-        # Ask for search engine preference at the start
-        user_choice = get_user_preferences_with_timeout()
-        logging.info(f"User selected search engine choice: {user_choice}")
 
         if not install_requirements():
             logging.error("Failed to install required packages. Exiting.")
@@ -326,7 +296,6 @@ def main():
 
         import psutil
         import requests
-        from selenium import webdriver
 
         # Part 1: Install Firefox and set custom user.js
         if is_firefox_running():
@@ -386,7 +355,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        if platform.system() == "Windows" and not is_admin():
+        if platform.system() == "Windows":
             if 'asadmin' not in sys.argv:
                 script = os.path.abspath(sys.argv[0])
                 params = ' '.join([script] + sys.argv[1:] + ['asadmin'])
