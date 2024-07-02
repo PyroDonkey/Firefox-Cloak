@@ -1,0 +1,48 @@
+{
+  "policies": {
+    "SearchEngines": {
+      "Add": [
+        {
+          "Name": "Brave",
+          "URLTemplate": "https://search.brave.com/search?q={searchTerms}",
+          "Method": "GET",
+          "IconURL": "https://brave.com/static-assets/images/brave-favicon.png",
+          "Alias": "@brave",
+          "Description": "Search Brave"
+        },
+        {
+          "Name": "Startpage",
+          "URLTemplate": "https://www.startpage.com/do/search?q={searchTerms}",
+          "Method": "GET",
+          "IconURL": "https://www.startpage.com/sp/cdn/favicons/favicon--default.ico",
+          "Alias": "@startpage",
+          "Description": "Search Startpage"
+        },
+        {
+          "Name": "Kagi",
+          "URLTemplate": "https://kagi.com/search?q={searchTerms}",
+          "Method": "GET",
+          "IconURL": "https://kagi.com/favicon.ico",
+          "Alias": "@kagi",
+          "Description": "Search Kagi (Subscription)"
+        }
+      ],
+      "Default": "DuckDuckGo",
+      "Remove": ["Google", "Bing", "Amazon.com", "eBay"]
+    },
+    "Preferences": {
+      "browser.search.suggest.enabled": {
+        "Value": false,
+        "Status": "default"
+      }
+    },
+    "DisableFirefoxStudies": true,
+    "DisableTelemetry": true,
+    "Extensions": {
+      "Install": [
+        "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+      ]
+    },
+    "ExtensionUpdate": true
+  }
+}
