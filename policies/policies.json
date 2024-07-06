@@ -28,12 +28,12 @@
         }
       ],
       "Default": "DuckDuckGo",
-      "Remove": ["Google", "Bing", "Amazon.com", "eBay"]
+      "Remove": ["Google", "Bing", "Amazon.com", "eBay", "Wikipedia"]
     },
     "Preferences": {
       "browser.search.suggest.enabled": {
         "Value": false,
-        "Status": "default"
+        "Status": "user"
       }
     },
     "DisableFirefoxStudies": true,
