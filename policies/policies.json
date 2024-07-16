@@ -28,8 +28,7 @@
         }
       ],
       "Default": "DuckDuckGo",
-      "Remove": ["Google", "Bing", "Amazon.com"],
-      "Deny": ["eBay", "Wikipedia"]
+      "Remove": ["Google", "Bing", "eBay", "Wikipedia"],
     },
     "Preferences": {
       "browser.search.suggest.enabled": {
