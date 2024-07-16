@@ -8,26 +8,36 @@ Cloak is designed to automatically enhance privacy and security settings for Fir
 
 ## Project Goal
 
-The aim of Cloak is to create an easy way for users to install a Firefox configuration that provides maximum security and privacy right out of the box. This project simplifies the process of modifying and applying numerous privacy-enhancing settings, making it accessible for users who want to prioritize their online privacy quickly and easily.
+The aim of Cloak is to create an easy way for users to install a Firefox configuration that provides enhanced security and privacy right out of the box. This project simplifies the process of modifying and applying numerous privacy-enhancing settings, making it accessible for users who want to prioritize their online privacy quickly and easily.
 
 ## Features
 
-The `strict_config.py` script applies the following privacy-enhancing configurations:
+Cloak offers two configuration options: Standard and Strict.
 
-- **Enhanced Privacy Protection**: Enables Strict Enhanced Tracking Protection for robust defense against trackers.
-- **Cookie Management**: Automatically deletes cookies and site data when Firefox is closed.
+### Standard Configuration
+
+The `standard_config.py` script applies the following privacy-enhancing configurations:
+
+- **Enhanced Privacy Protection**: Enables Standard Enhanced Tracking Protection.
 - **Telemetry Disabled**: Turns off all telemetry features to prevent data collection.
 - **HTTPS-Only Mode**: Enforces HTTPS connections in all windows for improved security.
-- **DNS Protection**: Configures maximum protection DNS settings and sets Quad9 as the DNS provider.
-- **Password Security**: Disables Firefox's built-in password manager feature as dedicated password manager software has better privacy and security features 
+- **DNS Protection**: Configures DNS-over-HTTPS settings and sets Quad9 as the DNS provider.
+- **Password Security**: Disables Firefox's built-in password manager feature.
 - **Search Privacy**: 
   - Disables search suggestions for increased privacy.
   - Sets DuckDuckGo as the default search engine.
-  - Adds Brave, Startpage, and Kagi (subscription required) as privacy-focused search options.
-  - Removes Google, Bing, and eBay from search shortcuts.
-- **Anti-Fingerprinting**: Activates fingerprinting protection measures to reduce online tracking.
+  - Adds Brave, Startpage, and Kagi as privacy-focused search options.
+  - Removes Google, and Bing from search shortcuts.
 - **New Tab Page**: Removes sponsored and curated content from the new tab page.
 - **Ad Blocking**: Automatically installs uBlock Origin extension for comprehensive ad and tracker blocking.
+
+### Strict Configuration
+
+The `strict_config.py` script applies all the standard configurations plus:
+
+- **Enhanced Privacy Protection**: Upgrades to Strict Enhanced Tracking Protection for robust defense against trackers.
+- **Cookie Management**: Automatically deletes cookies and site data when Firefox is closed.
+- **Anti-Fingerprinting**: Activates stronger fingerprinting protection measures to reduce online tracking.
 
 ## Scripts
 
@@ -36,18 +46,20 @@ The `strict_config.py` script applies the following privacy-enhancing configurat
 This batch script automates the setup process on Windows:
 
 - Checks for and installs Python if not present
-- Downloads and runs the `strict_config.py` script
+- Allows users to choose between Standard and Strict configurations
+- Downloads and runs the selected configuration script
 - Handles user confirmation and provides warnings about the changes
 
-### 2. Strict Configuration (strict_config.py)
+### 2. Configuration Scripts (standard_config.py and strict_config.py)
 
-This Python script installs Firefox ESR, automatically applies the privacy-enhancing configurations listed in the Features section, and installs uBlock Origin.
+These Python scripts install Firefox ESR, automatically apply the privacy-enhancing configurations listed in the Features section, and install uBlock Origin.
 
 ## Usage
 
 1. Download the `Windows Installer.bat` file.
 2. Right-click the file and select "Run as administrator".
-3. Follow the on-screen prompts to confirm the installation.
+3. Choose between Standard and Strict configurations when prompted.
+4. Follow the on-screen prompts to confirm the installation.
 
 ## Warnings
 
@@ -63,14 +75,12 @@ If you choose to run this script with an existing Firefox installation, please e
 - Some changes include stricter content blocking, fingerprinting protection, and changes to default search and new tab behaviors.
 - This script is not compatible with the Rapid Release version of Firefox.
 - **Important**: Please ensure you understand how installing these features will change your browsing experience before proceeding with the installation.
-- This script is designed to work only with official versions of Firefox. Use with modified or unofficial versions is not supported and may lead to unexpected results.
 
 ## Requirements
 
-- Windows operating system
+- Windows OS
 - Administrator privileges
 - Internet connection for downloading necessary files
-- Official version of Firefox ESR
 
 ## Logging
 
@@ -82,4 +92,4 @@ After installation, it's strongly recommended to review Privacy Guides for infor
 
 ## Contribution
 
-Contributions, issues, and feature requests are welcome. Feel free to check [issues page]([link-to-your-issues-page](https://github.com/PyroDonkey/Firefox-Cloak/issues)) if you want to contribute.
+Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/PyroDonkey/Firefox-Cloak/issues) if you want to contribute.
