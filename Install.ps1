@@ -136,3 +136,19 @@ Write-Host "----------------------------------" -ForegroundColor Cyan
 Write-Host "Firefox-Cloak Installation Complete!" -ForegroundColor Green
 Write-Host "You can now open Firefox. Enjoy your private browsing." -ForegroundColor Cyan
 Write-Host "----------------------------------" -ForegroundColor Cyan
+
+# 5. Launch Success Page
+Write-Host "Launching Setup Wizard..." -ForegroundColor Yellow
+$successHtmlUrl = "https://raw.githubusercontent.com/PyroDonkey/Firefox-Cloak/main/success.html"
+$successHtmlPath = Join-Path -Path $env:TEMP -ChildPath "CloakSuccess.html"
+
+try {
+    Invoke-WebRequest -Uri $successHtmlUrl -OutFile $successHtmlPath -UseBasicParsing
+    if (Test-Path $firefoxPath) {
+        Start-Process -FilePath $firefoxPath -ArgumentList "`"$successHtmlPath`""
+    } else {
+        Start-Process -FilePath $successHtmlPath
+    }
+} catch {
+    Write-Host "Could not load the stylized landing page. Installation is still complete." -ForegroundColor Yellow
+}

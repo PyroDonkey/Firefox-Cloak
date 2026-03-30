@@ -81,6 +81,7 @@ user_pref("browser.urlbar.trending.featureGate", false);
 
 // AI Chatbot Settings (Recent Additions)
 // Ensure AI Chat features in the sidebar or URL bar are disabled
+user_pref("browser.ai.blockAll", true); // Flips the main GUI toggle for AI controls
 user_pref("browser.ml.enable", false);
 user_pref("browser.ml.chat.enabled", false);
 user_pref("browser.ml.chat.shortcuts", false);
