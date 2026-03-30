@@ -80,16 +80,14 @@ Write-Host "Applying Privacy and Security Configurations..." -ForegroundColor Cy
 # Wait for Firefox to create profile if it was just installed (launch and close)
 $profilesDir = "$env:APPDATA\Mozilla\Firefox\Profiles"
 if (-not (Test-Path $profilesDir) -or (Get-ChildItem -Path $profilesDir -Filter "*.default*" | Measure-Object).Count -eq 0) {
-    Write-Host "No Firefox profiles found. Launching Firefox briefly to create one..." -ForegroundColor Yellow
+    Write-Host "No Firefox profiles found. Generating a new default-release profile..." -ForegroundColor Yellow
     
     if (Test-Path $firefoxPath) {
-        Start-Process -FilePath $firefoxPath
-        Start-Sleep -Seconds 5
-        Stop-Process -Name firefox -Force -ErrorAction SilentlyContinue | Out-Null
-        Start-Sleep -Seconds 2
+        # Using -CreateProfile generates the profile files without launching the GUI
+        Start-Process -FilePath $firefoxPath -ArgumentList "-CreateProfile default-release" -Wait
     }
     else {
-        Write-Error "Could not start Firefox to generate a profile."
+        Write-Error "Could not locate Firefox to generate a profile."
         exit
     }
 }

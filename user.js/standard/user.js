@@ -67,6 +67,8 @@ user_pref("browser.newtabpage.activity-stream.default.sites", "");
 user_pref("browser.newtabpage.pinned", "[]");
 user_pref("browser.tabs.firefox-view", false);
 user_pref("extensions.pocket.enabled", false);
+user_pref("browser.newtabpage.activity-stream.showWeather", false);
+user_pref("browser.messaging-system.whatsNewPanel.enabled", false);
 
 // Context Search & Suggest
 user_pref("browser.search.suggest.enabled", false);
@@ -79,6 +81,7 @@ user_pref("browser.urlbar.trending.featureGate", false);
 
 // AI Chatbot Settings (Recent Additions)
 // Ensure AI Chat features in the sidebar or URL bar are disabled
+user_pref("browser.ml.enable", false);
 user_pref("browser.ml.chat.enabled", false);
 user_pref("browser.ml.chat.shortcuts", false);
 user_pref("browser.ml.linkPreview.enabled", false);
@@ -100,3 +103,4 @@ user_pref("toolkit.telemetry.bhrPing.enabled", false);
 user_pref("toolkit.telemetry.firstShutdownPing.enabled", false);
 user_pref("toolkit.telemetry.coverage.opt-out", true);
 user_pref("toolkit.telemetry.reportingpolicy.firstRun", false);
+user_pref("browser.ping-centre.telemetry", false);
