@@ -78,13 +78,17 @@ if ($firefoxProcess) {
 Write-Host "Applying Privacy and Security Configurations..." -ForegroundColor Cyan
 
 # Wait for Firefox to create profile if it was just installed
-$profilesDir = "$env:APPDATA\Mozilla\Firefox\Profiles"
-$profilesIni  = "$env:APPDATA\Mozilla\Firefox\profiles.ini"
+$firefoxDataDir = "$env:APPDATA\Mozilla\Firefox"
+$profilesDir    = "$firefoxDataDir\Profiles"
+$profilesIni    = "$firefoxDataDir\profiles.ini"
 
 if (-not (Test-Path $profilesDir)) {
-    Write-Host "No Firefox profiles found. Generating a new default-release profile..." -ForegroundColor Yellow
+    Write-Host "No Firefox profiles found. Launching Firefox briefly to create one..." -ForegroundColor Yellow
     if (Test-Path $firefoxPath) {
-        Start-Process -FilePath $firefoxPath -ArgumentList "-CreateProfile default-release" -Wait
+        $proc = Start-Process -FilePath $firefoxPath -PassThru
+        Start-Sleep -Seconds 8
+        Stop-Process -Name firefox -Force -ErrorAction SilentlyContinue | Out-Null
+        Start-Sleep -Seconds 2
     }
     else {
         Write-Error "Could not locate Firefox to generate a profile."
@@ -92,42 +96,80 @@ if (-not (Test-Path $profilesDir)) {
     }
 }
 
-# Resolve the default profile from profiles.ini (the Default=1 entry)
+# Resolve the active profile from profiles.ini
+# Priority: [Install*] Default= > [Profile*] Default=1 > *.default-release folder
 $targetProfilePath = $null
+$installDefaultPath = $null
+$flagDefaultPath    = $null
 
 if (Test-Path $profilesIni) {
-    $iniLines    = Get-Content $profilesIni
-    $currentPath = $null
-    $isDefault   = $false
+    $iniLines      = Get-Content $profilesIni
+    $currentSection = ""
+    $currentPath    = $null
+    $isDefault      = $false
+    $installDefault = $null
 
     foreach ($line in $iniLines) {
-        if ($line -match '^\[') {
-            if ($isDefault -and $currentPath) {
-                $targetProfilePath = $currentPath
-                break
+        if ($line -match '^\[([^\]]+)\]') {
+            # Flush previous [Install*] section
+            if ($currentSection -match '^Install' -and $installDefault) {
+                $installDefaultPath = $installDefault
             }
-            $currentPath = $null
-            $isDefault   = $false
+            # Flush previous [Profile*] section
+            if ($currentSection -match '^Profile' -and $isDefault -and $currentPath) {
+                $flagDefaultPath = $currentPath
+            }
+
+            $currentSection = $Matches[1]
+            $currentPath    = $null
+            $isDefault      = $false
+            $installDefault = $null
         }
-        elseif ($line -match '^Path=(.+)') {
+        elseif ($line -match '^Path=(.+)' -and $currentSection -match '^Profile') {
             $rel = $Matches[1].Trim().Replace('/', '\')
-            $currentPath = Join-Path "$env:APPDATA\Mozilla\Firefox" $rel
+            $currentPath = Join-Path $firefoxDataDir $rel
         }
-        elseif ($line -match '^Default=1') {
+        elseif ($line -match '^Default=1' -and $currentSection -match '^Profile') {
             $isDefault = $true
         }
+        elseif ($line -match '^Default=(.+)' -and $currentSection -match '^Install') {
+            $rel = $Matches[1].Trim().Replace('/', '\')
+            $candidate = Join-Path $firefoxDataDir $rel
+            if (Test-Path $candidate) {
+                $installDefault = $candidate
+            }
+            else {
+                $candidate = Join-Path $profilesDir (Split-Path $rel -Leaf)
+                if (Test-Path $candidate) {
+                    $installDefault = $candidate
+                }
+            }
+        }
     }
-    # Handle default being the last section in the file
-    if ($isDefault -and $currentPath -and -not $targetProfilePath) {
-        $targetProfilePath = $currentPath
+
+    # Flush last section
+    if ($currentSection -match '^Install' -and $installDefault) {
+        $installDefaultPath = $installDefault
+    }
+    if ($currentSection -match '^Profile' -and $isDefault -and $currentPath) {
+        $flagDefaultPath = $currentPath
     }
 }
 
-# Fallback: first *.default-release folder if ini parse failed
-if (-not $targetProfilePath -or -not (Test-Path $targetProfilePath)) {
-    Write-Host "Could not resolve default profile from profiles.ini, falling back to folder scan..." -ForegroundColor Yellow
+# Apply priority: [Install*] > Default=1 > *.default-release scan
+if ($installDefaultPath -and (Test-Path $installDefaultPath)) {
+    $targetProfilePath = $installDefaultPath
+    Write-Host "Profile resolved via [Install*] section" -ForegroundColor DarkGray
+}
+elseif ($flagDefaultPath -and (Test-Path $flagDefaultPath)) {
+    $targetProfilePath = $flagDefaultPath
+    Write-Host "Profile resolved via Default=1 flag" -ForegroundColor DarkGray
+}
+else {
+    Write-Host "Falling back to folder scan for *.default-release..." -ForegroundColor Yellow
     $targetProfilePath = (Get-ChildItem -Path $profilesDir -Directory |
         Where-Object { $_.Name -like "*.default-release" } |
+        Sort-Object LastWriteTime -Descending |
         Select-Object -First 1).FullName
 }
 
@@ -140,14 +182,13 @@ $targetProfile = Get-Item $targetProfilePath
 Write-Host "Target Profile: $($targetProfile.FullName)" -ForegroundColor Green
 
 # 4. Download and Apply user.js
-$userJsUrl = "https://raw.githubusercontent.com/PyroDonkey/Firefox-Cloak/main/user.js/standard/user.js"
+$userJsUrl  = "https://raw.githubusercontent.com/PyroDonkey/Firefox-Cloak/main/user.js/standard/user.js"
 $userJsPath = Join-Path -Path $targetProfile.FullName -ChildPath "user.js"
 $prefsJsPath = Join-Path -Path $targetProfile.FullName -ChildPath "prefs.js"
 
 # Backup existing user.js
 if (Test-Path $userJsPath) {
     $backupPath = "$userJsPath.bak"
-    # Overwrite old backup if exists
     if (Test-Path $backupPath) { Remove-Item -Path $backupPath -Force }
     Rename-Item -Path $userJsPath -NewName "user.js.bak" -Force
     Write-Host "Backed up existing user.js to user.js.bak" -ForegroundColor Yellow
@@ -155,18 +196,33 @@ if (Test-Path $userJsPath) {
 
 try {
     Invoke-WebRequest -Uri $userJsUrl -OutFile $userJsPath -UseBasicParsing
-    Write-Host "Successfully downloaded and applied new user.js" -ForegroundColor Green
 }
 catch {
     Write-Error "Failed to download user.js configuration from GitHub."
     exit
 }
 
-# Delete prefs.js so user.js takes precedence on next launch
+# Verify downloaded file is valid JS
+$firstLines = Get-Content $userJsPath -TotalCount 3
+if ($firstLines -notmatch 'user_pref') {
+    Write-Error "Downloaded user.js appears invalid (no user_pref calls found). Check the GitHub URL."
+    exit
+}
+
+Write-Host "Successfully downloaded and applied new user.js" -ForegroundColor Green
+Write-Host "  Location: $userJsPath" -ForegroundColor DarkGray
+
+# Delete prefs.js so user.js settings take effect cleanly on next launch
 if (Test-Path $prefsJsPath) {
     Remove-Item -Path $prefsJsPath -Force
     Write-Host "Cleared prefs.js to apply new settings cleanly" -ForegroundColor Yellow
 }
+
+# Ensure file is readable by the current user (admin write can restrict perms on some systems)
+$acl = Get-Acl $userJsPath
+$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($env:USERNAME, "Read", "Allow")
+$acl.AddAccessRule($rule)
+Set-Acl $userJsPath $acl
 
 Write-Host "----------------------------------" -ForegroundColor Cyan
 Write-Host "Firefox-Cloak Installation Complete!" -ForegroundColor Green
