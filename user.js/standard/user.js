@@ -34,7 +34,6 @@ user_pref("privacy.clearOnShutdown_v2.formdata", true);
 user_pref("privacy.clearOnShutdown_v2.siteSettings", false);
 
 // Geolocation
-user_pref("geo.provider.network.url", "https://location.services.mozilla.com/v1/geolocate?key=%MOZILLA_API_KEY%");
 user_pref("geo.provider.ms-windows-location", false);
 user_pref("geo.provider.use_gpsd", false);
 user_pref("geo.provider.use_geoclue", false);
@@ -96,16 +95,7 @@ user_pref("browser.urlbar.wikipedia.featureGate", false);
 user_pref("browser.urlbar.yelp.featureGate", false);
 user_pref("browser.formfill.enable", false);
 
-// AI Controls (Settings > AI Controls > Block AI enhancements)
-user_pref("browser.ai.control.default", "blocked");
-user_pref("browser.ai.control.translations", "blocked");
-user_pref("browser.ai.control.pdfjsAltText", "blocked");
-user_pref("browser.ai.control.smartTabGroups", "blocked");
-user_pref("browser.ai.control.linkPreviewKeyPoints", "blocked");
-user_pref("browser.ai.control.sidebarChatbot", "blocked");
-user_pref("browser.ai.control.smartWindow", "blocked");
-user_pref("extensions.ml.enabled", false);
-user_pref("browser.ml.enable", false);
+// AI / ML / GenAI Controls
 user_pref("browser.translations.enable", false);
 user_pref("browser.ml.chat.enabled", false);
 user_pref("browser.ml.chat.provider", "");
@@ -127,7 +117,6 @@ user_pref("browser.smartwindow.enabled", false);
 user_pref("browser.smartwindow.sidebar.openByDefault", false);
 user_pref("browser.smartwindow.memories.generateFromHistory", false);
 user_pref("browser.smartwindow.memories.generateFromConversation", false);
-user_pref("browser.smartwindow.tos.consentTime", 0);
 user_pref("pdfjs.enableGuessAltText", false);
 user_pref("pdfjs.enableAltTextModelDownload", false);
 user_pref("pdfjs.enableAltText", false);
@@ -149,9 +138,6 @@ user_pref("toolkit.telemetry.updatePing.enabled", false);
 user_pref("toolkit.telemetry.bhrPing.enabled", false);
 user_pref("toolkit.telemetry.firstShutdownPing.enabled", false);
 user_pref("toolkit.telemetry.coverage.opt-out", true);
-user_pref("toolkit.telemetry.reportingpolicy.firstRun", false);
-user_pref("browser.ping-centre.telemetry", false);
-user_pref("breakpad.reportURL", "");
 user_pref("browser.tabs.crashReporting.sendReport", false);
 user_pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
 
