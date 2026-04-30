@@ -111,28 +111,28 @@ if (Test-Path $profilesIni) {
 
     foreach ($line in $iniLines) {
         if ($line -match '^\[([^\]]+)\]') {
-            # Flush previous [Install*] section
-            if ($currentSection -match '^Install' -and $installDefault) {
+            $newSection = $Matches[1]
+
+            if ($currentSection -like 'Install*' -and $installDefault) {
                 $installDefaultPath = $installDefault
             }
-            # Flush previous [Profile*] section
-            if ($currentSection -match '^Profile' -and $isDefault -and $currentPath) {
+            if ($currentSection -like 'Profile*' -and $isDefault -and $currentPath) {
                 $flagDefaultPath = $currentPath
             }
 
-            $currentSection = $Matches[1]
+            $currentSection = $newSection
             $currentPath    = $null
             $isDefault      = $false
             $installDefault = $null
         }
-        elseif ($line -match '^Path=(.+)' -and $currentSection -match '^Profile') {
+        elseif ($currentSection -like 'Profile*' -and $line -match '^Path=(.+)') {
             $rel = $Matches[1].Trim().Replace('/', '\')
             $currentPath = Join-Path $firefoxDataDir $rel
         }
-        elseif ($line -match '^Default=1' -and $currentSection -match '^Profile') {
+        elseif ($currentSection -like 'Profile*' -and $line -match '^Default=1') {
             $isDefault = $true
         }
-        elseif ($line -match '^Default=(.+)' -and $currentSection -match '^Install') {
+        elseif ($currentSection -like 'Install*' -and $line -match '^Default=(.+)') {
             $rel = $Matches[1].Trim().Replace('/', '\')
             $candidate = Join-Path $firefoxDataDir $rel
             if (Test-Path $candidate) {
@@ -147,21 +147,30 @@ if (Test-Path $profilesIni) {
         }
     }
 
-    # Flush last section
-    if ($currentSection -match '^Install' -and $installDefault) {
+    if ($currentSection -like 'Install*' -and $installDefault) {
         $installDefaultPath = $installDefault
     }
-    if ($currentSection -match '^Profile' -and $isDefault -and $currentPath) {
+    if ($currentSection -like 'Profile*' -and $isDefault -and $currentPath) {
         $flagDefaultPath = $currentPath
     }
 }
 
+function Test-IsValidProfile {
+    param([string]$Path)
+    if (-not $Path -or -not (Test-Path $Path)) { return $false }
+    $dir = Get-Item $Path
+    if (-not $dir.PSIsContainer) { return $false }
+    if ($dir.FullName -eq $firefoxDataDir) { return $false }
+    if ($dir.FullName -eq $profilesDir) { return $false }
+    return $true
+}
+
 # Apply priority: [Install*] > Default=1 > *.default-release scan
-if ($installDefaultPath -and (Test-Path $installDefaultPath)) {
+if (Test-IsValidProfile $installDefaultPath) {
     $targetProfilePath = $installDefaultPath
     Write-Host "Profile resolved via [Install*] section" -ForegroundColor DarkGray
 }
-elseif ($flagDefaultPath -and (Test-Path $flagDefaultPath)) {
+elseif (Test-IsValidProfile $flagDefaultPath) {
     $targetProfilePath = $flagDefaultPath
     Write-Host "Profile resolved via Default=1 flag" -ForegroundColor DarkGray
 }
@@ -173,7 +182,7 @@ else {
         Select-Object -First 1).FullName
 }
 
-if (-not $targetProfilePath -or -not (Test-Path $targetProfilePath)) {
+if (-not (Test-IsValidProfile $targetProfilePath)) {
     Write-Error "Could not find a valid Firefox profile. Open Firefox once, close it, then re-run this script."
     exit
 }
