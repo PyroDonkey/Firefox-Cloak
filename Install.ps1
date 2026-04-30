@@ -203,8 +203,8 @@ catch {
 }
 
 # Verify downloaded file is valid JS
-$firstLines = Get-Content $userJsPath -TotalCount 3
-if ($firstLines -notmatch 'user_pref') {
+$jsContent = Get-Content $userJsPath -Raw
+if ($jsContent -notmatch 'user_pref') {
     Write-Error "Downloaded user.js appears invalid (no user_pref calls found). Check the GitHub URL."
     exit
 }
@@ -217,12 +217,6 @@ if (Test-Path $prefsJsPath) {
     Remove-Item -Path $prefsJsPath -Force
     Write-Host "Cleared prefs.js to apply new settings cleanly" -ForegroundColor Yellow
 }
-
-# Ensure file is readable by the current user (admin write can restrict perms on some systems)
-$acl = Get-Acl $userJsPath
-$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($env:USERNAME, "Read", "Allow")
-$acl.AddAccessRule($rule)
-Set-Acl $userJsPath $acl
 
 Write-Host "----------------------------------" -ForegroundColor Cyan
 Write-Host "Firefox-Cloak Installation Complete!" -ForegroundColor Green
