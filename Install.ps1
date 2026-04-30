@@ -77,13 +77,13 @@ if ($firefoxProcess) {
 # 3. Apply Configuration
 Write-Host "Applying Privacy and Security Configurations..." -ForegroundColor Cyan
 
-# Wait for Firefox to create profile if it was just installed (launch and close)
+# Wait for Firefox to create profile if it was just installed
 $profilesDir = "$env:APPDATA\Mozilla\Firefox\Profiles"
-if (-not (Test-Path $profilesDir) -or (Get-ChildItem -Path $profilesDir -Filter "*.default*" | Measure-Object).Count -eq 0) {
+$profilesIni  = "$env:APPDATA\Mozilla\Firefox\profiles.ini"
+
+if (-not (Test-Path $profilesDir)) {
     Write-Host "No Firefox profiles found. Generating a new default-release profile..." -ForegroundColor Yellow
-    
     if (Test-Path $firefoxPath) {
-        # Using -CreateProfile generates the profile files without launching the GUI
         Start-Process -FilePath $firefoxPath -ArgumentList "-CreateProfile default-release" -Wait
     }
     else {
@@ -92,15 +92,51 @@ if (-not (Test-Path $profilesDir) -or (Get-ChildItem -Path $profilesDir -Filter 
     }
 }
 
-$profiles = Get-ChildItem -Path $profilesDir -Directory | Where-Object { $_.Name -like "*.default-release*" -or $_.Name -like "*.default*" }
+# Resolve the default profile from profiles.ini (the Default=1 entry)
+$targetProfilePath = $null
 
-if ($profiles.Count -eq 0) {
-    Write-Error "Could not find a valid Firefox profile. Please open Firefox once manually, close it, and try again."
+if (Test-Path $profilesIni) {
+    $iniLines    = Get-Content $profilesIni
+    $currentPath = $null
+    $isDefault   = $false
+
+    foreach ($line in $iniLines) {
+        if ($line -match '^\[') {
+            if ($isDefault -and $currentPath) {
+                $targetProfilePath = $currentPath
+                break
+            }
+            $currentPath = $null
+            $isDefault   = $false
+        }
+        elseif ($line -match '^Path=(.+)') {
+            $rel = $Matches[1].Trim().Replace('/', '\')
+            $currentPath = Join-Path "$env:APPDATA\Mozilla\Firefox" $rel
+        }
+        elseif ($line -match '^Default=1') {
+            $isDefault = $true
+        }
+    }
+    # Handle default being the last section in the file
+    if ($isDefault -and $currentPath -and -not $targetProfilePath) {
+        $targetProfilePath = $currentPath
+    }
+}
+
+# Fallback: first *.default-release folder if ini parse failed
+if (-not $targetProfilePath -or -not (Test-Path $targetProfilePath)) {
+    Write-Host "Could not resolve default profile from profiles.ini, falling back to folder scan..." -ForegroundColor Yellow
+    $targetProfilePath = (Get-ChildItem -Path $profilesDir -Directory |
+        Where-Object { $_.Name -like "*.default-release" } |
+        Select-Object -First 1).FullName
+}
+
+if (-not $targetProfilePath -or -not (Test-Path $targetProfilePath)) {
+    Write-Error "Could not find a valid Firefox profile. Open Firefox once, close it, then re-run this script."
     exit
 }
 
-# Pick the first matching profile (Prefer default-release)
-$targetProfile = $profiles | Sort-Object { $_.Name -match "default-release" } -Descending | Select-Object -First 1
+$targetProfile = Get-Item $targetProfilePath
 Write-Host "Target Profile: $($targetProfile.FullName)" -ForegroundColor Green
 
 # 4. Download and Apply user.js
